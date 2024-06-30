@@ -1,38 +1,31 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/boltdb/bolt"
 	"github.com/gocolly/colly"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/segmentio/ksuid"
 )
 
 var (
-	bucketName          = []byte("bookmarks")
-	errKeyAlreadyExists = errors.New("key already exists")
-	frontmatter         = `
+	frontmatter = `
 ---
 url: %s
 fetched_at: %s
-tags: [ %s ]
+%s
 ---
 `
 )
 
-type Handler struct {
-	DB *bolt.DB
-}
+type Handler struct{}
 
-func (h *Handler) HandlePost(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	rawURL := r.URL.Query().Get("url")
 	if len(rawURL) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -49,69 +42,35 @@ func (h *Handler) HandlePost(w http.ResponseWriter, r *http.Request) {
 		key = key[:len(key)-1]
 	}
 
-	if err := h.DB.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(bucketName)
-		if bucket.Get([]byte(key)) != nil {
-			return errKeyAlreadyExists
-		}
-		return nil
-	}); err != nil {
-		if errors.Is(err, errKeyAlreadyExists) {
-			w.WriteHeader(http.StatusConflict)
-			return
-		}
-
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	tags := r.URL.Query()["tags"]
 
 	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		policy := bluemonday.UGCPolicy()
-		converter := md.NewConverter(r.Request.URL.Path, true, nil)
-		markdown, err := converter.ConvertBytes(policy.SanitizeBytes(r.Body))
+	c.OnResponse(func(cr *colly.Response) {
+		body := bluemonday.UGCPolicy().SanitizeBytes(cr.Body)
+		converter := md.NewConverter(cr.Request.URL.Path, true, nil)
+		markdown, err := converter.ConvertBytes(body)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		f, err := os.Create(fmt.Sprintf("docs/%s.md", ksuid.New()))
+		contents := strings.Join(
+			[]string{
+				buildFrontmatter(cr.Request.URL.String(), time.Now().Format(time.RFC3339), tags...),
+				string(markdown),
+			},
+			"\n",
+		)
+
+		link, err := buildObsidianLink("obsidian-plugin-dev", fmt.Sprintf("Clippings/%s", ksuid.New()), contents)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		defer f.Close()
 
-		if _, err = f.WriteString(
-			mkFrontMatter(
-				r.Request.URL.String(),
-				time.Now().Format(time.RFC3339),
-				tags...,
-			),
-		); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if _, err = f.WriteString("\n"); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if _, err = f.Write(markdown); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if err := h.DB.Update(func(tx *bolt.Tx) error {
-			bucket := tx.Bucket(bucketName)
-			return bucket.Put([]byte(key), []byte(time.Now().Format(time.RFC3339)))
-		}); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		w.Header().Set("Location", link)
+		http.Redirect(w, r, link, http.StatusFound)
+		return
 	})
 
 	if err := c.Visit(rawURL); err != nil {
@@ -122,7 +81,7 @@ func (h *Handler) HandlePost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func mkFrontMatter(url string, fetchedAt string, tags ...string) string {
+func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
 	var formattedTags string
 	for i, tag := range tags {
 		if i == len(tags)-1 {
@@ -137,4 +96,30 @@ func mkFrontMatter(url string, fetchedAt string, tags ...string) string {
 		fetchedAt,
 		formattedTags,
 	)
+}
+
+func buildObsidianLink(vault string, path string, content string) (string, error) {
+	// mimick Javascript's encodeURIComponent, which is looser than Go's url.QueryEscape
+	encodeURIComponent := func(str string) string {
+		result := strings.Replace(str, "+", "%20", -1)
+		result = strings.Replace(result, "%21", "!", -1)
+		result = strings.Replace(result, "%27", "'", -1)
+		result = strings.Replace(result, "%28", "(", -1)
+		result = strings.Replace(result, "%29", ")", -1)
+		result = strings.Replace(result, "%2A", "*", -1)
+		return result
+	}
+
+	baseURL, err := url.Parse("obsidian://new")
+	if err != nil {
+		return "", err
+	}
+
+	values := url.Values{}
+	values.Add("vault", vault)
+	values.Add("file", path)
+	values.Add("content", content)
+	baseURL.RawQuery = encodeURIComponent(values.Encode())
+
+	return baseURL.String(), nil
 }

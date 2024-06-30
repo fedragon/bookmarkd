@@ -1,0 +1,1 @@
+javascript:(function()%7Bvar%20tags%20%3D%20prompt(%22tags%3A%20%22%2C%20%22%22)%0A%20%20.split(%22%2C%22)%0A%20%20.map(tag%20%3D%3E%20'tags%3D'%20%2B%20tag.trim())%0A%20%20.join(%22%26%22)%3B%0Adocument.location.href%20%3D%20'http%3A%2F%2Flocalhost%3A3000%2Fbookmarks%3Furl%3D'%20%2B%20encodeURIComponent(document.location)%20%2B%20'%26'%20%2B%20tags%3B%7D)()%3B
