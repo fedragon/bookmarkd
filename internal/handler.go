@@ -14,13 +14,7 @@ import (
 )
 
 var (
-	frontmatter = `
----
-url: %s
-fetched_at: %s
-%s
----
-`
+	frontmatter = "---\nurl: %s\nfetched_at: %s\n%s\n---\n"
 )
 
 type Handler struct{}
@@ -54,7 +48,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		contents := strings.Join(
+		content := strings.Join(
 			[]string{
 				buildFrontmatter(cr.Request.URL.String(), time.Now().Format(time.RFC3339), tags...),
 				string(markdown),
@@ -62,7 +56,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 			"\n",
 		)
 
-		link, err := buildObsidianLink("obsidian-plugin-dev", fmt.Sprintf("Clippings/%s", ksuid.New()), contents)
+		link, err := buildObsidianLink("obsidian-plugin-dev", fmt.Sprintf("Clippings/%s", ksuid.New()), content)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
