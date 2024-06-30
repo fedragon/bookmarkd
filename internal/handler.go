@@ -22,14 +22,10 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parsedURL, err := url.Parse(rawURL)
+	_, err := url.Parse(rawURL)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-	key := strings.Split(parsedURL.String(), "?")[0]
-	if key[len(key)-1] == '/' {
-		key = key[:len(key)-1]
 	}
 
 	tags := r.URL.Query()["tags"]
