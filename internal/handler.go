@@ -13,10 +13,6 @@ import (
 	"github.com/segmentio/ksuid"
 )
 
-var (
-	frontmatter = "---\nurl: %s\nfetched_at: %s\n%s\n---\n"
-)
-
 type Handler struct{}
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +88,7 @@ func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
 	}
 
 	return fmt.Sprintf(
-		frontmatter,
+		"---\nurl: %s\nfetched_at: %s\n%s\n---\n",
 		url,
 		fetchedAt,
 		formattedTags,
