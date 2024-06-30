@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/segmentio/ksuid"
@@ -31,9 +33,20 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	tags := r.URL.Query()["tags"]
 
 	c := colly.NewCollector()
-	c.OnResponse(func(cr *colly.Response) {
-		body := bluemonday.UGCPolicy().SanitizeBytes(cr.Body)
-		converter := md.NewConverter(cr.Request.URL.Path, true, nil)
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		filename := ksuid.New().String()
+		e.DOM.ChildrenFiltered("head").ChildrenFiltered("title").Each(func(_ int, s *goquery.Selection) {
+			filename =
+				strings.ToLower(
+					strings.ReplaceAll(
+						regexp.MustCompile(`[^a-zA-Z0-9 _\-]+`).ReplaceAllString(s.Text(), ""),
+						" ", "_",
+					),
+				)
+		})
+
+		body := bluemonday.UGCPolicy().SanitizeBytes(e.Response.Body)
+		converter := md.NewConverter(e.Request.URL.Path, true, nil)
 		markdown, err := converter.ConvertBytes(body)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -42,13 +55,13 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 
 		content := strings.Join(
 			[]string{
-				buildFrontmatter(cr.Request.URL.String(), time.Now().Format(time.RFC3339), tags...),
+				buildFrontmatter(e.Request.URL.String(), time.Now().Format(time.RFC3339), tags...),
 				string(markdown),
 			},
 			"\n",
 		)
 
-		link, err := buildObsidianLink("obsidian-plugin-dev", fmt.Sprintf("Clippings/%s", ksuid.New()), content)
+		link, err := buildObsidianLink("obsidian-plugin-dev", fmt.Sprintf("Clippings/%s", filename), content)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -112,6 +125,7 @@ func buildObsidianLink(vault string, path string, content string) (string, error
 	values.Add("vault", vault)
 	values.Add("file", path)
 	values.Add("content", content)
+	values.Add("overwrite", "true")
 	baseURL.RawQuery = encodeURIComponent(values.Encode())
 
 	return baseURL.String(), nil
