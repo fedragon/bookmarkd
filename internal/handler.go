@@ -77,6 +77,9 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 
 func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
 	var formattedTags string
+	if len(tags) > 0 {
+		formattedTags = "tags: ["
+	}
 	for i, tag := range tags {
 		if i == len(tags)-1 {
 			formattedTags += fmt.Sprintf(`"%s"`, tag)
@@ -84,6 +87,10 @@ func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
 			formattedTags += fmt.Sprintf(`"%s", `, tag)
 		}
 	}
+	if len(tags) > 0 {
+		formattedTags += "]"
+	}
+
 	return fmt.Sprintf(
 		frontmatter,
 		url,
