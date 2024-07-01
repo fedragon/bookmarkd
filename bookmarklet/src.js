@@ -1,5 +1,11 @@
 var tags = prompt("tags: ", "")
   .split(",")
-  .map(tag => 'tags=' + tag.trim())
+  .map(tag => 'tags=' + encodeURIComponent(tag.trim()))
   .join("&");
-document.location.href = 'http://localhost:3000/bookmarks?url=' + encodeURIComponent(document.location) + '&' + tags;
+
+url = 'http://localhost:3000/bookmarks?url=' + encodeURIComponent(document.location)
+if (tags) {
+  url += '&' + tags
+}
+
+document.location.href = url;

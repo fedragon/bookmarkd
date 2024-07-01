@@ -12,10 +12,12 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/segmentio/ksuid"
 )
 
-type Handler struct{}
+type Handler struct {
+	Vault  string
+	Folder string
+}
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	rawURL := r.URL.Query().Get("url")
@@ -34,7 +36,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	c := colly.NewCollector()
 	c.OnHTML("html", func(e *colly.HTMLElement) {
-		filename := ksuid.New().String()
+		filename := time.Now().Format("20060102_150405")
 		e.DOM.ChildrenFiltered("head").ChildrenFiltered("title").Each(func(_ int, s *goquery.Selection) {
 			filename =
 				strings.ToLower(
@@ -61,7 +63,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 			"\n",
 		)
 
-		link, err := buildObsidianLink("obsidian-plugin-dev", fmt.Sprintf("Clippings/%s", filename), content)
+		link, err := buildObsidianLink(h.Vault, fmt.Sprintf("%s/%s", h.Folder, filename), content)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -105,7 +107,7 @@ func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
 }
 
 func buildObsidianLink(vault string, path string, content string) (string, error) {
-	// mimick Javascript's encodeURIComponent, which is looser than Go's url.QueryEscape
+	// mimic Javascript's encodeURIComponent, which is looser than Go's url.QueryEscape
 	encodeURIComponent := func(str string) string {
 		result := strings.Replace(str, "+", "%20", -1)
 		result = strings.Replace(result, "%21", "!", -1)
