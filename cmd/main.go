@@ -1,9 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"errors"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -23,11 +28,36 @@ func main() {
 		Folder: config.ObsidianFolder,
 	}
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/bookmarks", handler.Handle)
+	router := chi.NewRouter()
+	router.Use(middleware.Logger)
+	router.Get("/bookmarks", handler.Handle)
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.HttpPort), r); err != nil {
+	server := &http.Server{Addr: config.HttpAddress, Handler: router}
+	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sig
+
+		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+
+		go func() {
+			<-shutdownCtx.Done()
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
+				log.Fatal("graceful shutdown timed out.. forcing exit.")
+			}
+		}()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Fatal(err)
+		}
+		serverStopCtx()
+	}()
+
+	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
+
+	<-serverCtx.Done()
 }
