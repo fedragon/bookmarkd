@@ -2,6 +2,8 @@
 
 Converts HTML pages to Markdown files and stores them in a local [Obsidian](https://obsidian.md) vault, in line with Steph Ango's [File over app](https://stephango.com/file-over-app) philosophy.
 
+Whenever you'd like to bookmark a page, click on the provided bookmarklet, and it will be added to your Obsidian vault.
+
 ## Usage
 
 Run the server with the following command (on your local machine, or anywhere you'd like to execute it from):
@@ -24,11 +26,7 @@ cd bookmarklet
 node maker.js
 ```
 
-To install the bookmarklet in your browser, drag the link below to your bookmarks' bar:
-
-[Clip in Obsidian](/bookmarklet/bookmarklet.js)
-
-Whenever you'd like to bookmark a page click on the bookmarklet, and it will be added to your Obsidian vault.
+To install the bookmarklet in your browser, right-click on your bookmarks' bar, select "Add Bookmark" and paste the contents of [bookmarklet.js](bookmarklet/bookmarklet.js) in the "URL" field:
 
 ## Credits
 
