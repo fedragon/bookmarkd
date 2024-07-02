@@ -1,16 +1,16 @@
-var tags = prompt("tags: ", "")
+const tags = prompt("tags: ", "")
   .split(",")
   .map(tag => 'tags=' + encodeURIComponent(tag.trim()))
   .join("&");
 
-var addr = 'http://localhost:3333'
-var vault = 'my-vault'
-var folder = 'Clippings'
+const addr = 'http://localhost:3333/api/bookmarks';
+const vault = 'my-vault';
+const folder = 'Clippings';
 
-var url = addr + '/bookmarks?' +
+let url = addr + '?' +
   'vault=' + encodeURIComponent(vault) +
   '&folder=' + encodeURIComponent(folder) +
-  '&url=' + encodeURIComponent(document.location)
+  '&url=' + encodeURIComponent(document.location);
 
 if (tags) {
   url += '&' + tags
