@@ -76,6 +76,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Location", link)
+		w.Header().Set("Content-Type", "")
 		http.Redirect(w, r, link, http.StatusFound)
 		return
 	})
