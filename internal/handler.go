@@ -14,12 +14,18 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-type Handler struct {
-	Vault  string
-	Folder string
-}
+func Handle(w http.ResponseWriter, r *http.Request) {
+	vault := r.URL.Query().Get("vault")
+	if len(vault) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
+	folder := r.URL.Query().Get("folder")
+	if len(folder) == 0 {
+		folder = "Clippings"
+	}
+
 	rawURL := r.URL.Query().Get("url")
 	if len(rawURL) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -63,7 +69,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 			"\n",
 		)
 
-		link, err := buildObsidianLink(h.Vault, fmt.Sprintf("%s/%s", h.Folder, filename), content)
+		link, err := buildObsidianLink(vault, fmt.Sprintf("%s/%s", folder, filename), content)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

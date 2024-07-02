@@ -3,7 +3,15 @@ var tags = prompt("tags: ", "")
   .map(tag => 'tags=' + encodeURIComponent(tag.trim()))
   .join("&");
 
-url = 'http://localhost:3000/bookmarks?url=' + encodeURIComponent(document.location)
+var addr = 'http://localhost:3333'
+var vault = 'my-vault'
+var folder = 'Clippings'
+
+var url = addr + '/bookmarks?' +
+  'vault=' + encodeURIComponent(vault) +
+  '&folder=' + encodeURIComponent(folder) +
+  '&url=' + encodeURIComponent(document.location)
+
 if (tags) {
   url += '&' + tags
 }

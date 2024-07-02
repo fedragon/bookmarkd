@@ -23,14 +23,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	handler := &internal.Handler{
-		Vault:  config.ObsidianVault,
-		Folder: config.ObsidianFolder,
-	}
-
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Get("/bookmarks", handler.Handle)
+	router.Get("/bookmarks", internal.Handle)
 
 	server := &http.Server{Addr: config.HttpAddress, Handler: router}
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
