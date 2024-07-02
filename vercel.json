@@ -1,0 +1,9 @@
+{
+  "regions": ["dub1"],
+  "functions": {
+    "api/**/*": {
+      "maxDuration": 5,
+      "memory": 256
+    }
+  }
+}
