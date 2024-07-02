@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/kelseyhightower/envconfig"
 
+	"github.com/fedragon/bookmd/api"
 	"github.com/fedragon/bookmd/internal"
 )
 
@@ -25,7 +26,7 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Get("/bookmarks", internal.Handle)
+	router.Get("/bookmarks", api.Handle)
 
 	server := &http.Server{Addr: config.HttpAddress, Handler: router}
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
