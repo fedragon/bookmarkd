@@ -1,6 +1,6 @@
 const tags = prompt("tags: ", "")
   .split(",")
-  .map(tag => 'tags=' + encodeURIComponent(tag.trim()))
+  .map(tag => 'tag=' + encodeURIComponent(tag.trim()))
   .join("&");
 
 const addr = 'http://localhost:3333/api/bookmarks';

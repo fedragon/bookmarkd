@@ -2,9 +2,11 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,13 +34,27 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := url.Parse(rawURL)
-	if err != nil {
+	tags := r.URL.Query()["tag"]
+
+	silent := strings.ToLower(r.URL.Query().Get("silent")) == "true"
+
+	fetchedAt := time.Now()
+	if rawEpoch := r.URL.Query().Get("epoch"); len(rawEpoch) > 0 {
+		epoch, err := strconv.Atoi(rawEpoch)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if epoch > 0 {
+			fetchedAt = time.Unix(int64(epoch), 0)
+		}
+	}
+
+	if _, err := url.Parse(rawURL); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	tags := r.URL.Query()["tags"]
 
 	c := colly.NewCollector()
 	c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -57,20 +73,22 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		converter := md.NewConverter(e.Request.URL.Path, true, nil)
 		markdown, err := converter.ConvertBytes(body)
 		if err != nil {
+			log.Printf("failed to convert body to Markdown: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		content := strings.Join(
 			[]string{
-				buildFrontmatter(e.Request.URL.String(), time.Now().Format(time.RFC3339), tags...),
+				buildFrontmatter(e.Request.URL.String(), fetchedAt.Format(time.RFC3339), tags...),
 				string(markdown),
 			},
 			"\n",
 		)
 
-		link, err := buildObsidianLink(vault, fmt.Sprintf("%s/%s", folder, filename), content)
+		link, err := buildObsidianLink(vault, fmt.Sprintf("%s/%s", folder, filename), content, silent)
 		if err != nil {
+			log.Printf("failed to build obsidian link: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -81,6 +99,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err := c.Visit(rawURL); err != nil {
+		log.Printf("failed to visit %s: %s\n", rawURL, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -112,7 +131,7 @@ func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
 	)
 }
 
-func buildObsidianLink(vault string, path string, content string) (string, error) {
+func buildObsidianLink(vault string, path string, content string, silent bool) (string, error) {
 	// mimic Javascript's encodeURIComponent, which is looser than Go's url.QueryEscape
 	encodeURIComponent := func(str string) string {
 		result := strings.Replace(str, "+", "%20", -1)
@@ -134,6 +153,10 @@ func buildObsidianLink(vault string, path string, content string) (string, error
 	values.Add("file", path)
 	values.Add("content", content)
 	values.Add("overwrite", "true")
+	if silent {
+		values.Add("silent", "true")
+	}
+
 	baseURL.RawQuery = encodeURIComponent(values.Encode())
 
 	return baseURL.String(), nil

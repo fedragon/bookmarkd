@@ -15,18 +15,21 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/fedragon/bookmd/api"
-	"github.com/fedragon/bookmd/internal"
 )
 
+type Config struct {
+	HttpAddress string `envconfig:"BOOKMD_HTTP_ADDRESS" default:"0.0.0.0:3333"`
+}
+
 func main() {
-	config := internal.Config{}
+	config := Config{}
 	if err := envconfig.Process("", &config); err != nil {
 		log.Fatal(err)
 	}
 
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Get("/bookmarks", api.Handle)
+	router.Get("/api/bookmarks", api.Handle)
 
 	server := &http.Server{Addr: config.HttpAddress, Handler: router}
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
