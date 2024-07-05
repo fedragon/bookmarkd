@@ -1,0 +1,22 @@
+{
+  "name": "pocket-importer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "tsx": "^4.16.2"
+  },
+  "dependencies": {
+    "node-html-parser": "^6.1.13",
+    "playwright": "^1.45.1"
+  },
+  "type": "module",
+  "compilerOptions": {
+    "esModuleInterop": true
+  }
+}

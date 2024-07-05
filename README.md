@@ -45,6 +45,10 @@ To install the bookmarklet in your browser:
 - select "Add Bookmark", then
 - paste the contents of [bookmarklet/bookmarklet.js](bookmarklet/bookmarklet.js) in the "URL" field
 
+## Bonus: Import Pocket saves
+
+The repository contains an optional importer for [Pocket](https://getpocket.com/) saves in the `pocket-importer` directory. See its README for details.
+
 ## Credits
 
 Inspired by [downmark](https://github.com/alessandro-fazzi/downmark).
