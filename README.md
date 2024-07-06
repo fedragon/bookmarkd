@@ -1,4 +1,4 @@
-# bookmd
+# bookmarkd
 
 Converts HTML pages to Markdown files and stores them in a local [Obsidian](https://obsidian.md) vault, in line with Steph Ango's [File over app](https://stephango.com/file-over-app) philosophy.
 

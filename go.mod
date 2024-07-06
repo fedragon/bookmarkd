@@ -1,4 +1,4 @@
-module github.com/fedragon/bookmd
+module github.com/fedragon/bookmarkd
 
 go 1.22
 

@@ -1,6 +1,6 @@
 # Pocket importer
 
-Imports Pocket saves into Bookmd.
+Imports Pocket saves in Obsidian using `bookmarkd`.
 
 **Disclaimer:** Use at your own risk, no guarantees whatsoever. I've used it to migrate my own Pocket saves and it worked fine except for a few websites.
 
@@ -14,7 +14,7 @@ Open the [Pocket Export](https://getpocket.com/export) page and click on "Export
 
 ### Run server
 
-From the root of the `bookmd` project, run
+From the root of the `bookmarkd` project, run
 
 ```shell
 make

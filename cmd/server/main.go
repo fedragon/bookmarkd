@@ -14,11 +14,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/fedragon/bookmd/api"
+	"github.com/fedragon/bookmarkd/api"
 )
 
 type Config struct {
-	HttpAddress string `envconfig:"BOOKMD_HTTP_ADDRESS" default:"0.0.0.0:3333"`
+	HttpAddress string `envconfig:"BOOKMARKD_HTTP_ADDRESS" default:"0.0.0.0:3333"`
 }
 
 func main() {
