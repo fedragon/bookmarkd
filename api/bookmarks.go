@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
+	nurl "net/url"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/gocolly/colly"
+	"github.com/go-shiori/go-readability"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -28,8 +27,8 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		folder = "Clippings"
 	}
 
-	rawURL := r.URL.Query().Get("url")
-	if len(rawURL) == 0 {
+	url := r.URL.Query().Get("url")
+	if len(url) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -51,60 +50,46 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if _, err := url.Parse(rawURL); err != nil {
+	if _, err := nurl.Parse(url); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	c := colly.NewCollector()
-	c.OnHTML("html", func(e *colly.HTMLElement) {
-		filename := time.Now().Format("20060102_150405")
-		e.DOM.ChildrenFiltered("head").ChildrenFiltered("title").Each(func(_ int, s *goquery.Selection) {
-			filename =
-				strings.ToLower(
-					strings.ReplaceAll(
-						regexp.MustCompile(`[^a-zA-Z0-9 _\-]+`).ReplaceAllString(s.Text(), ""),
-						" ", "_",
-					),
-				)
-		})
-
-		body := bluemonday.UGCPolicy().SanitizeBytes(e.Response.Body)
-		converter := md.NewConverter(e.Request.URL.Path, true, nil)
-		markdown, err := converter.ConvertBytes(body)
-		if err != nil {
-			log.Printf("failed to convert body to Markdown: %s\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		content := strings.Join(
-			[]string{
-				buildFrontmatter(e.Request.URL.String(), fetchedAt.Format(time.RFC3339), tags...),
-				string(markdown),
-			},
-			"\n",
-		)
-
-		link, err := buildObsidianLink(vault, fmt.Sprintf("%s/%s", folder, filename), content, silent)
-		if err != nil {
-			log.Printf("failed to build obsidian link: %s\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Location", link)
-		http.Redirect(w, r, link, http.StatusFound)
-		return
-	})
-
-	if err := c.Visit(rawURL); err != nil {
-		log.Printf("failed to visit %s: %s\n", rawURL, err)
+	article, err := readability.FromURL(url, 10*time.Second)
+	if err != nil {
+		log.Printf("failed to parse %s: %v\n", url, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	filename := time.Now().Format("20060102_150405")
+	if len(article.Title) > 0 {
+		filename = regexp.MustCompile(`[^a-zA-Z0-9 _\-]+`).ReplaceAllString(article.Title, "")
+	}
+
+	converter := md.NewConverter(url, true, nil)
+	mdContent, err := converter.ConvertString(bluemonday.UGCPolicy().Sanitize(article.Content))
+	if err != nil {
+		log.Printf("failed to convert body to Markdown: %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	parts := []string{buildFrontmatter(url, fetchedAt.Format(time.RFC3339), tags...)}
+	if len(article.Title) > 0 {
+		parts = append(parts, fmt.Sprintf("# %s\n", article.Title))
+	}
+
+	content := strings.Join(append(parts, mdContent), "\n")
+	link, err := buildObsidianLink(vault, fmt.Sprintf("%s/%s", folder, filename), content, silent)
+	if err != nil {
+		log.Printf("failed to build obsidian link: %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Location", link)
+	http.Redirect(w, r, link, http.StatusFound)
 }
 
 func buildFrontmatter(url string, fetchedAt string, tags ...string) string {
@@ -143,12 +128,12 @@ func buildObsidianLink(vault string, path string, content string, silent bool) (
 		return result
 	}
 
-	baseURL, err := url.Parse("obsidian://new")
+	baseURL, err := nurl.Parse("obsidian://new")
 	if err != nil {
 		return "", err
 	}
 
-	values := url.Values{}
+	values := nurl.Values{}
 	values.Add("vault", vault)
 	values.Add("file", path)
 	values.Add("content", content)
