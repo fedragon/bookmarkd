@@ -16,11 +16,9 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/fedragon/bookmarkd/api"
+	"github.com/fedragon/bookmarkd/assets"
 	"github.com/fedragon/bookmarkd/internal"
 )
-
-//go:embed icon.svg
-var icon []byte
 
 func main() {
 	systray.Run(onReady, onExit)
@@ -38,7 +36,7 @@ func onReady() {
 		return run(gctx, &cfg)
 	})
 
-	systray.SetIcon(icon)
+	systray.SetIcon(assets.Icon)
 	systray.SetTooltip("bookmark'd: store bookmarks in Obsidian")
 	systray.SetOnClick(func(menu systray.IMenu) {
 		if err := menu.ShowMenu(); err != nil {

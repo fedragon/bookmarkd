@@ -10,7 +10,7 @@ function die {
 }
 
 APPNAME=bookmarkd
-ICONNAME=../cmd/tray/icon.svg
+ICONNAME=../assets/icon.svg
 
 if [ ! -f $ICONNAME ]; then
 	die "Image file for icon not found"
