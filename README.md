@@ -65,5 +65,7 @@ The repository contains an optional importer for [Pocket](https://getpocket.com/
 ## Credits
 
 Initial design inspired by [downmark](https://github.com/alessandro-fazzi/downmark).
+
 Packaging script adapted from [xeoncross/macappshell](https://github.com/xeoncross/macappshell).
+
 Tray icon courtesy of [ionicons](https://ionic.io/ionicons/usage#bookmarks-outline).
