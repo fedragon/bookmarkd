@@ -15,8 +15,7 @@ The code can run either locally or as a [Vercel Function](https://vercel.com/doc
 Running
 
 ```bash
-cd macos
-./bundle.sh
+make bundle-macos
 ```
 
 will create a macOS app in `macos/bookmarkd.app`. Open the app, and it will keep the server running, showing its status in the system tray.
@@ -26,7 +25,7 @@ will create a macOS app in `macos/bookmarkd.app`. Open the app, and it will keep
 Build the binary with
 
 ```bash
-go build -o bin/server cmd/server/main.go
+make build-server
 ```
 
 and then run it (on your local machine, or anywhere you'd like):
@@ -35,7 +34,7 @@ and then run it (on your local machine, or anywhere you'd like):
 ./bin/server
 ```
 
-The default server address is `http://localhost:20918`, and can be configured via the `BOOKMD_HTTP_ADDRESS` environment variable.
+The default server address is `http://localhost:11235`, and can be configured via the `BOOKMD_HTTP_ADDRESS` environment variable.
 
 The endpoint will be available at `<your_url>/api/bookmarks`.
 
@@ -43,13 +42,13 @@ The endpoint will be available at `<your_url>/api/bookmarks`.
 
 Deploy it to your Vercel account. The endpoint will be available at `<vercel_url>/api/bookmarks`. No code changes are required.
 
-## Install bookmarklet
+## Generate and install bookmarklet
 
-Update the `addr`, `vault`, and `folder` variables in [bookmarklet/src.js](bookmarklet/src.js) as applicable to your setup, then run
+Run the following to update `bookmarklet.js` as required by your setup:
 
 ```shell
-cd bookmarklet
-node maker.js
+make build-bookmarklet  # build the binary
+./bin/bookmarklet       # update `bookmarklet.js` (you will be prompted for details)
 ```
 
 To install the bookmarklet in your browser:

@@ -7,7 +7,7 @@ import * as fs from "node:fs";
     const defaultContext = browser.contexts()[0];
     const page = defaultContext.pages()[0];
 
-    const serverAddress = 'http://localhost:20918';
+    const serverAddress = 'http://localhost:11235';
     const vault = 'my-vault';
     const folder = 'Clippings';
     const doc = fs.readFileSync('./pocket-export.html', 'utf8');

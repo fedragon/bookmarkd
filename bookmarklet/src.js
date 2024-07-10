@@ -3,9 +3,9 @@ const tags = prompt("tags: ", "")
   .map(tag => 'tag=' + encodeURIComponent(tag.trim()))
   .join("&");
 
-const addr = 'http://localhost:20918/api/bookmarks';
-const vault = 'my-vault';
-const folder = 'Clippings';
+const addr = '{{.Address}}';
+const vault = '{{.Vault}}';
+const folder = '{{.Folder}}';
 
 let url = addr + '?' +
   'vault=' + encodeURIComponent(vault) +
@@ -17,3 +17,4 @@ if (tags) {
 }
 
 document.location.href = url;
+
