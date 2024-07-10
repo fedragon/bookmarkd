@@ -17,9 +17,9 @@ import (
 )
 
 func main() {
-	var address string
-	var vault string
-	var folder string
+	address := "http://localhost:11235"
+	vault := "Vault"
+	folder := "Clippings"
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -29,7 +29,7 @@ func main() {
 				Value(&address),
 			huh.NewInput().
 				Title("Vault").
-				Placeholder("my-vault").
+				Placeholder("Vault").
 				Value(&vault),
 			huh.NewInput().
 				Title("Folder").
@@ -73,7 +73,7 @@ func main() {
 			),
 		),
 	)
-	if err := os.WriteFile("bookmarklet.js", []byte(content), 0644); err != nil {
+	if err := os.WriteFile("bookmarklet/bookmarklet.js", []byte(content), 0644); err != nil {
 		log.Fatal(err)
 	}
 }
