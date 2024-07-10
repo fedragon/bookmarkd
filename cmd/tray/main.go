@@ -27,27 +27,33 @@ func main() {
 }
 
 func onReady() {
+	cfg := internal.Config{}
+	if err := envconfig.Process("", &cfg); err != nil {
+		log.Fatal(err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	group, gctx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		return run(gctx)
+		return run(gctx, &cfg)
 	})
 
 	systray.SetIcon(icon)
-	systray.SetTooltip("Store bookmarks in Obsidian")
+	systray.SetTooltip("bookmark'd: store bookmarks in Obsidian")
 	systray.SetOnClick(func(menu systray.IMenu) {
 		if err := menu.ShowMenu(); err != nil {
 			fmt.Println(err)
 		}
 	})
 
-	systray.AddMenuItem("bookmarkd", "").Disable()
+	systray.AddMenuItem("bookmark'd", "Name").Disable()
+	systray.AddMenuItem(fmt.Sprintf("Address: %s", cfg.HttpAddress), "Address").Disable()
 
 	mStatus := systray.AddMenuItem("Status: 🍏", "Status")
 	mStatus.Disable()
 
 	group.Go(func() error {
-		checkStatus(gctx, mStatus)
+		checkStatus(gctx, cfg.HttpAddress, mStatus)
 		return nil
 	})
 
@@ -66,16 +72,16 @@ func onReady() {
 
 func onExit() {}
 
-func checkStatus(ctx context.Context, mStatus *systray.MenuItem) {
+func checkStatus(ctx context.Context, httpAddr string, mStatus *systray.MenuItem) {
 	client := &http.Client{Timeout: time.Second}
 	for {
 		select {
 		case <-ctx.Done():
 			fmt.Println("quitting (2)")
 			return
-		case <-time.Tick(time.Second * 5):
+		case <-time.Tick(time.Second * 10):
 			fmt.Println("updating status...")
-			res, err := client.Get("http://localhost:3333/api/status")
+			res, err := client.Get(fmt.Sprintf("http://%s/api/status", httpAddr))
 			if err != nil {
 				mStatus.SetTitle("Status: ❌")
 				fmt.Println(err)
@@ -88,12 +94,7 @@ func checkStatus(ctx context.Context, mStatus *systray.MenuItem) {
 	}
 }
 
-func run(ctx context.Context) error {
-	config := internal.Config{}
-	if err := envconfig.Process("", &config); err != nil {
-		return err
-	}
-
+func run(ctx context.Context, cfg *internal.Config) error {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Get("/api/bookmarks", api.Handle)
@@ -101,7 +102,7 @@ func run(ctx context.Context) error {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	server := &http.Server{Addr: config.HttpAddress, Handler: router}
+	server := &http.Server{Addr: cfg.HttpAddress, Handler: router}
 
 	go func() {
 		fmt.Println("starting server...")

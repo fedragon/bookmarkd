@@ -3,8 +3,6 @@
 set -eu
 
 # Mac OSX .app builder
-# Copied from https://github.com/xeoncross/macappshell/blob/master/setup.sh, all credits (and many thanks!) to its author.
-# Note: slightly adjusted to feet my project's needs.
 
 function die {
 	echo "ERROR: $1" > /dev/null 1>&2

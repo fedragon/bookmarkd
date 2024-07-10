@@ -3,7 +3,7 @@ const tags = prompt("tags: ", "")
   .map(tag => 'tag=' + encodeURIComponent(tag.trim()))
   .join("&");
 
-const addr = 'http://localhost:3333/api/bookmarks';
+const addr = 'http://localhost:20918/api/bookmarks';
 const vault = 'my-vault';
 const folder = 'Clippings';
 

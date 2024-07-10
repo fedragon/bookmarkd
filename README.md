@@ -1,4 +1,4 @@
-# bookmarkd
+# bookmark'd
 
 Converts HTML pages to Markdown files and stores them in a local [Obsidian](https://obsidian.md) vault, in line with Steph Ango's [File over app](https://stephango.com/file-over-app) philosophy.
 
@@ -6,20 +6,20 @@ Whenever you'd like to bookmark a page, click on the provided bookmarklet, and y
 
 ## Usage
 
-The code can run either as a standalone HTTP server or as a [Vercel Function](https://vercel.com/docs/functions/runtimes/go). In either case, after the deployment you have to change the URL in `bookmarklet/src.js` to point to your deployed code and then follow the instructions in [Install bookmarklet](README.md#install-bookmarklet).
+The code can run either locally or as a [Vercel Function](https://vercel.com/docs/functions/runtimes/go). In either case, after the deployment you have to change the URL in `bookmarklet/src.js` to point to your deployed code and then follow the instructions in [Install bookmarklet](README.md#install-bookmarklet).
 
-### Run as HTTP server
+### Run locally
 
-### Option 1: as macOS app
+#### Option 1: as macOS app
 
 Running
 
 ```bash
-cd dist
-./package.sh
+cd macos
+./bundle.sh
 ```
 
-will create a macOS app in `dist/bookmarkd.app` which will keep the server running and show its status in the system tray.
+will create a macOS app in `macos/bookmarkd.app`. Open the app, and it will keep the server running, showing its status in the system tray.
 
 #### Option 2: Headless
 
@@ -35,7 +35,7 @@ and then run it (on your local machine, or anywhere you'd like):
 ./bin/server
 ```
 
-The default server address is `http://localhost:3333`, and can be configured via the `BOOKMD_HTTP_ADDRESS` environment variable.
+The default server address is `http://localhost:20918`, and can be configured via the `BOOKMD_HTTP_ADDRESS` environment variable.
 
 The endpoint will be available at `<your_url>/api/bookmarks`.
 
@@ -60,8 +60,10 @@ To install the bookmarklet in your browser:
 
 ## Bonus: Import Pocket saves
 
-The repository contains an optional importer for [Pocket](https://getpocket.com/) saves in the `pocket-importer` directory. See its README for details.
+The repository contains an optional importer for [Pocket](https://getpocket.com/) saves in the `pocket-importer` directory. See its own README for details.
 
 ## Credits
 
-Inspired by [downmark](https://github.com/alessandro-fazzi/downmark).
+Initial design inspired by [downmark](https://github.com/alessandro-fazzi/downmark).
+Packaging script adapted from [xeoncross/macappshell](https://github.com/xeoncross/macappshell).
+Tray icon courtesy of [ionicons](https://ionic.io/ionicons/usage#bookmarks-outline).
