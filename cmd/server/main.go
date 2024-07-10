@@ -15,14 +15,11 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/fedragon/bookmarkd/api"
+	"github.com/fedragon/bookmarkd/internal"
 )
 
-type Config struct {
-	HttpAddress string `envconfig:"BOOKMARKD_HTTP_ADDRESS" default:"0.0.0.0:3333"`
-}
-
 func main() {
-	config := Config{}
+	config := internal.Config{}
 	if err := envconfig.Process("", &config); err != nil {
 		log.Fatal(err)
 	}

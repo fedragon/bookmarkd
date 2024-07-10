@@ -10,6 +10,8 @@ The code can run either as a standalone HTTP server or as a [Vercel Function](ht
 
 ### Run as HTTP server
 
+#### Option 1: Headless
+
 Build the binary with
 
 ```bash
@@ -25,6 +27,20 @@ and then run it (on your local machine, or anywhere you'd like):
 The default server address is `http://localhost:3333`, and can be configured via the `BOOKMD_HTTP_ADDRESS` environment variable.
 
 The endpoint will be available at `<your_url>/api/bookmarks`.
+
+### Option 2: Show in system tray
+
+Build the binary with
+
+```bash
+go build -o bin/tray cmd/tray/main.go
+```
+
+and then run it:
+
+```
+./bin/tray
+```
 
 ### Run as Vercel Function
 
