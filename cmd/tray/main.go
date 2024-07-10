@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/energye/systray"
-	"github.com/energye/systray/icon"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/kelseyhightower/envconfig"
@@ -18,6 +18,9 @@ import (
 	"github.com/fedragon/bookmarkd/api"
 	"github.com/fedragon/bookmarkd/internal"
 )
+
+//go:embed icon.svg
+var icon []byte
 
 func main() {
 	systray.Run(onReady, onExit)
@@ -30,23 +33,17 @@ func onReady() {
 		return run(gctx)
 	})
 
-	systray.SetIcon(icon.Data)
-	systray.SetTitle("bookmarkd")
+	systray.SetIcon(icon)
 	systray.SetTooltip("Store bookmarks in Obsidian")
 	systray.SetOnClick(func(menu systray.IMenu) {
 		if err := menu.ShowMenu(); err != nil {
 			fmt.Println(err)
 		}
 	})
-	systray.SetOnDClick(func(_ systray.IMenu) {})
-	systray.SetOnRClick(func(menu systray.IMenu) {
-		if err := menu.ShowMenu(); err != nil {
-			fmt.Println(err)
-		}
-	})
+
+	systray.AddMenuItem("bookmarkd", "").Disable()
 
 	mStatus := systray.AddMenuItem("Status: 🍏", "Status")
-	mStatus.SetIcon(icon.Data)
 	mStatus.Disable()
 
 	group.Go(func() error {
@@ -55,7 +52,6 @@ func onReady() {
 	})
 
 	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
-	mQuit.SetIcon(icon.Data)
 	mQuit.Enable()
 	mQuit.Click(func() {
 		fmt.Println("quitting (1)")
