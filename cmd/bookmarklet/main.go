@@ -10,70 +10,49 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/charmbracelet/huh"
-
 	"github.com/fedragon/bookmarkd/bookmarklet"
 	"github.com/fedragon/bookmarkd/internal"
 )
 
+const html = `
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<a href="{{ .URL }}">Generate bookmarklet</a>
+</body>
+</html>
+`
+
 func main() {
-	address := "http://localhost:11235"
-	vault := "Vault"
-	folder := "Clippings"
-
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewInput().
-				Title("HTTP server address").
-				Placeholder("http://localhost:11235").
-				Value(&address),
-			huh.NewInput().
-				Title("Vault").
-				Placeholder("Vault").
-				Value(&vault),
-			huh.NewInput().
-				Title("Folder").
-				Placeholder("Clippings").
-				Value(&folder),
-		),
-	)
-
-	if err := form.Run(); err != nil {
-		log.Fatal(err)
-	}
-
-	tpl, err := template.New("bookmarklet").Parse(bookmarklet.SourceFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	writer := bytes.NewBuffer([]byte{})
-	if err := tpl.Execute(
-		writer,
-		struct {
-			Address string
-			Vault   string
-			Folder  string
-		}{
-			Address: address,
-			Vault:   vault,
-			Folder:  folder,
-		},
-	); err != nil {
-		log.Fatal(err)
-	}
-
-	encoded := url.QueryEscape(strings.TrimSpace(writer.String()))
-	content := fmt.Sprintf(
+	escaped := url.QueryEscape(strings.TrimSpace(bookmarklet.SourceFile))
+	encoded := fmt.Sprintf(
 		"javascript:%s",
 		internal.EncodeURIComponent(
 			fmt.Sprintf(
 				"(function(){%s})();",
-				encoded,
+				escaped,
 			),
 		),
 	)
-	if err := os.WriteFile("bookmarklet/bookmarklet.js", []byte(content), 0644); err != nil {
+
+	tpl, err := template.New("bookmarklet").Parse(html)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buffer := new(bytes.Buffer)
+	if err := tpl.Execute(buffer, struct{ URL string }{URL: encoded}); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.WriteFile("bookmarklet/index.html", buffer.Bytes(), 0644); err != nil {
 		log.Fatal(err)
 	}
 }

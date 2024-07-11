@@ -6,7 +6,7 @@ Whenever you'd like to bookmark a page, click on the provided bookmarklet, and y
 
 ## Usage
 
-The code can run either locally or as a [Vercel Function](https://vercel.com/docs/functions/runtimes/go). In either case, after the deployment you have to change the URL in `bookmarklet/src.js` to point to your deployed code and then follow the instructions in [Install bookmarklet](README.md#install-bookmarklet).
+Below are a few ways to run the bookmark manager. In any case, you will need to install the bookmarklet in your browser (see instructions in [Install bookmarklet](README.md#install-bookmarklet)).
 
 ### Run locally
 
@@ -20,7 +20,7 @@ make bundle-macos
 
 will create a macOS app in `macos/bookmarkd.app`. Open the app, and it will keep the server running, showing its status in the system tray.
 
-#### Option 2: Headless
+#### Option 2: standalone HTTP server
 
 Build the binary with
 
@@ -38,24 +38,19 @@ The default server address is `http://localhost:11235`, and can be configured vi
 
 The endpoint will be available at `<your_url>/api/bookmarks`.
 
-### Run as Vercel Function
+### Run as [Vercel Function](https://vercel.com/docs/functions/runtimes/go)
 
 Deploy it to your Vercel account. The endpoint will be available at `<vercel_url>/api/bookmarks`. No code changes are required.
 
-## Generate and install bookmarklet
+### Install bookmarklet
 
-Run the following to update `bookmarklet.js` as required by your setup:
+Open [this page](bookmarklet/index.html) in your browser and click on the link in it. You will be prompted for details about your setup and finally see an alert dialog with javascript code: that's your bookmarklet!
 
-```shell
-make build-bookmarklet  # build the binary
-./bin/bookmarklet       # update `bookmarklet.js` (you will be prompted for details)
-```
+Copy the whole content of the final prompt and install the bookmarklet in your browser by:
 
-To install the bookmarklet in your browser:
-
-- right-click on your bookmarks' bar,
-- select "Add Bookmark", then
-- paste the contents of [bookmarklet/bookmarklet.js](bookmarklet/bookmarklet.js) in the "URL" field
+- right-clicking on your bookmarks' bar,
+- selecting "Add Bookmark", and finally
+- pasting the copied contents in the "URL" field (the name is up to you).
 
 ## Bonus: Import Pocket saves
 

@@ -1,0 +1,14 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<a href="javascript:(function(){const%20addr%20%3D%20prompt('HTTP%20server%20address%3A%20'%2C%20'http%3A%2F%2Flocalhost%3A11235')%3B%0Aconst%20vault%20%3D%20prompt('Vault%3A%20'%2C%20'Vault')%3B%0Aconst%20folder%20%3D%20prompt('Folder%3A%20'%2C%20'Clippings')%3B%0A%0Aconst%20payload%20%3D%20%60%0Aconst%20tags%20%3D%20prompt(%22tags%3A%20%22%2C%20%22%22)%0A%20%20.split(%22%2C%22)%0A%20%20.map(tag%20%3D%3E%20'tag%3D'%20%2B%20encodeURIComponent(tag.trim()))%0A%20%20.join(%22%26%22)%3B%0A%0Alet%20url%20%3D%20'%24%7Baddr%7D%2Fapi%2Fbookmarks%3F'%20%2B%0A%20%20'vault%3D'%20%2B%20encodeURIComponent('%24%7Bvault%7D')%20%2B%0A%20%20'%26folder%3D'%20%2B%20encodeURIComponent('%24%7Bfolder%7D')%20%2B%0A%20%20'%26url%3D'%20%2B%20encodeURIComponent(document.location)%3B%0A%0Aif%20(tags)%20%7B%0A%20%20url%20%2B%3D%20'%26'%20%2B%20tags%3B%0A%7D%0A%0Adocument.location.href%20%3D%20url%3B%0A%60%0A%0Aalert(%22javascript%3A%22%20%2B%20encodeURIComponent(%22(function()%7B%22%20%2B%20payload%20%2B%20%22%7D)()%3B%22))%3B})();">Generate bookmarklet</a>
+</body>
+</html>

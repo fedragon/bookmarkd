@@ -1,20 +1,23 @@
+const addr = prompt('HTTP server address: ', 'http://localhost:11235');
+const vault = prompt('Vault: ', 'Vault');
+const folder = prompt('Folder: ', 'Clippings');
+
+const payload = `
 const tags = prompt("tags: ", "")
   .split(",")
   .map(tag => 'tag=' + encodeURIComponent(tag.trim()))
   .join("&");
 
-const addr = '{{.Address}}';
-const vault = '{{.Vault}}';
-const folder = '{{.Folder}}';
-
-let url = addr + '?' +
-  'vault=' + encodeURIComponent(vault) +
-  '&folder=' + encodeURIComponent(folder) +
+let url = '${addr}/api/bookmarks?' +
+  'vault=' + encodeURIComponent('${vault}') +
+  '&folder=' + encodeURIComponent('${folder}') +
   '&url=' + encodeURIComponent(document.location);
 
 if (tags) {
-  url += '&' + tags
+  url += '&' + tags;
 }
 
 document.location.href = url;
+`
 
+alert("javascript:" + encodeURIComponent("(function(){" + payload + "})();"));
