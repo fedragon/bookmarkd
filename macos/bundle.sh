@@ -47,6 +47,8 @@ cat > "$APPNAME.app/Contents/Info.plist" <<END
   <integer>1</integer>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSSupportsAutomaticGraphicsSwitching</key><true/>
+  <key>LSUIElement</key>
+  <true/>
 </dict>
 </plist>
 END
