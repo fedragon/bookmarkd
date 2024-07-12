@@ -19,12 +19,6 @@ fi
 rm -rf "$APPNAME.app"
 mkdir -p "$APPNAME.app/Contents/"{MacOS,Resources}
 
-# Build app and copy executable to .app
-mkdir -p bin
-go build -o "bin/$APPNAME" ../cmd/tray/main.go
-cp "bin/$APPNAME" "$APPNAME.app/Contents/MacOS"
-rm -r bin
-
 # Create Info.plist
 cat > "$APPNAME.app/Contents/Info.plist" <<END
 <?xml version="1.0" encoding="UTF-8"?>

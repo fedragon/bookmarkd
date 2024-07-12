@@ -15,7 +15,7 @@ Below are a few ways to run the bookmark manager. In any case, you will need to 
 Running
 
 ```bash
-make bundle-macos
+make build-macos
 ```
 
 will create a macOS app in `macos/bookmarkd.app`. Open the app, and it will keep the server running, showing its status in the system tray.

@@ -10,6 +10,13 @@ build-bookmarklet:
 build-tray:
 	go build -o bin/tray cmd/tray/main.go
 
+.PHONY: macos
+macos: bundle-macos build-macos
+
+.PHONY: build-macos
+build-macos: build-tray
+	cp bin/tray macos/bookmarkd.app/Contents/MacOS/bookmarkd
+
 .PHONY: bundle-macos
 bundle-macos:
 	cd macos && ./bundle.sh
