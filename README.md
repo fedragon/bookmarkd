@@ -62,4 +62,4 @@ Initial design inspired by [downmark](https://github.com/alessandro-fazzi/downma
 
 Packaging script adapted from [xeoncross/macappshell](https://github.com/xeoncross/macappshell).
 
-Tray icon courtesy of [ionicons](https://ionic.io/ionicons/usage#bookmarks-outline).
+Tray icon created by [SVG Repo](https://www.svgrepo.com/svg/118921/bookmark-sketched-symbol-outline) and licensed under [CC0 License](https://creativecommons.org/publicdomain/zero/1.0/).
