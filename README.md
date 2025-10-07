@@ -1,5 +1,11 @@
 # bookmark'd
 
+## Note
+
+This repository is now maintained at https://codeberg.org/freidereikhs/bookmarkd.
+
+---
+
 Converts HTML pages to Markdown files and stores them in a local [Obsidian](https://obsidian.md) vault, in line with Steph Ango's [File over app](https://stephango.com/file-over-app) philosophy.
 
 Whenever you'd like to bookmark a page, click on the provided bookmarklet, and you will be prompted to add it to your Obsidian vault.
